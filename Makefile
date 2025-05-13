@@ -2,13 +2,13 @@
 CXX = clang++
 
 # Compiler flags
-CXXFLAGS = -Wall -Wextra -g -v
+CXXFLAGS = -Wall -Wextra -g -v -std=c++17
 
 # Target executable
 TARGET = $(OBJDIR)/main
 
 # Source files
-SRCS = main.cpp lexer.cpp
+SRCS = $(shell find . -name '*.cpp')
 
 # Object directory
 OBJDIR = build
@@ -23,7 +23,7 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
 $(OBJDIR)/%.o: %.cpp
-	@mkdir -p $(OBJDIR)
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Clean up build files
