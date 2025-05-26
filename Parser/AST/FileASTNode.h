@@ -20,5 +20,7 @@ public:
       child->print();
     }
   }
+  void codegen(const std::unique_ptr<llvm::LLVMContext> &context,
+               const std::unique_ptr<llvm::Module> &module) const override {}
 };
 #endif // FILE_AST_NODE_H

@@ -1,13 +1,15 @@
 #include "Parser.h"
-#include "../Lexer.h"
-#include "AST/ArgumentAST.h"
+#include "../Lexer/Lexer.h"
+#include "AST/ArgumentNode.h"
 #include "AST/FileASTNode.h"
-#include "AST/FunctionSignatureAST.h"
+#include "AST/FunctionSignatureNode.h"
+#include "AST/ReturnNode.h"
 #include <cstddef>
 #include <memory>
 #include <vector>
 
-Parser::Parser(Lexer &lexer) : lexer(lexer), root(FileASTNode()) {
+Parser::Parser(Lexer &lexer)
+    : lexer(lexer), root(std::make_unique<FileASTNode>()) {
   // Initialize the parser with the lexer
   while (true) {
     currentToken = lexer.getNextToken();
@@ -15,38 +17,22 @@ Parser::Parser(Lexer &lexer) : lexer(lexer), root(FileASTNode()) {
       break;
     }
     if (currentToken.type == tok_func) {
-      auto func = std::make_unique<FunctionAST>();
+      auto func = std::make_unique<FunctionNode>();
       func->signature = parseFunctionSignature();
       func->body = parseFunctionBody();
-      root.children.push_back(std::move(func));
+
+      root->children.push_back(std::move(func));
     }
   }
 
-  root.print();
+  root->print();
 }
 
-std::vector<std::unique_ptr<ArgumentAST>> Parser::parseParameterList() {
-  auto params = std::vector<std::unique_ptr<ArgumentAST>>();
+std::vector<std::unique_ptr<ArgumentNode>> Parser::parseParameterList() {
+  auto params = std::vector<std::unique_ptr<ArgumentNode>>();
   while (true) {
-    if (currentToken.type != tok_identifier) {
-      std::cerr << "Expected parameter name" << std::endl;
-      return params;
-    }
-    std::string paramName = currentToken.identifierName;
-    currentToken = lexer.getNextToken(); // Consume parameter name
-    if (currentToken.type != tok_colon) {
-      std::cerr << "Expected ':' after parameter name" << std::endl;
-      return params;
-    }
-    currentToken = lexer.getNextToken(); // Consume ':'
-    if (currentToken.type != tok_identifier) {
-      std::cerr << "Expected parameter type" << std::endl;
-      return params;
-    }
-    std::string paramType = currentToken.identifierName;
-    auto param = std::make_unique<ArgumentAST>(paramName, paramType);
+    auto param = parseArgument();
     params.push_back(std::move(param));
-    currentToken = lexer.getNextToken(); // Consume parameter type
     if (currentToken.type == tok_comma) {
       currentToken = lexer.getNextToken(); // Consume ','
     } else if (currentToken.type == tok_right_paren) {
@@ -60,9 +46,31 @@ std::vector<std::unique_ptr<ArgumentAST>> Parser::parseParameterList() {
   return params;
 }
 
-std::unique_ptr<FunctionSignatureAST> Parser::parseFunctionSignature() {
+std::unique_ptr<ArgumentNode> Parser::parseArgument() {
+  if (currentToken.type != tok_identifier) {
+    std::cerr << "Expected parameter name" << std::endl;
+    return nullptr;
+  }
+  std::string paramName = currentToken.identifierName;
+  currentToken = lexer.getNextToken(); // Consume parameter name
+  if (currentToken.type != tok_colon) {
+    std::cerr << "Expected ':' after parameter name" << std::endl;
+    return nullptr;
+  }
+  currentToken = lexer.getNextToken(); // Consume ':'
+  if (currentToken.type != tok_identifier) {
+    std::cerr << "Expected parameter type" << std::endl;
+    return nullptr;
+  }
+  std::string paramType = currentToken.identifierName;
+  auto param = std::make_unique<ArgumentNode>(paramName, paramType);
+  currentToken = lexer.getNextToken(); // Consume parameter type
+  return std::move(param);
+}
+
+std::unique_ptr<FunctionSignatureNode> Parser::parseFunctionSignature() {
   std::cout << "Parsing function signature..." << std::endl;
-  auto funcSignature = std::make_unique<FunctionSignatureAST>();
+  auto funcSignature = std::make_unique<FunctionSignatureNode>();
 
   std::string funcName;
   std::string returnType;
@@ -81,7 +89,7 @@ std::unique_ptr<FunctionSignatureAST> Parser::parseFunctionSignature() {
   currentToken = lexer.getNextToken(); // Consume '('
   if (currentToken.type == tok_right_paren) {
     // No parameters
-    funcSignature->parameters = std::vector<std::unique_ptr<ArgumentAST>>();
+    funcSignature->parameters = std::vector<std::unique_ptr<ArgumentNode>>();
   } else {
     funcSignature->parameters = parseParameterList();
   }
@@ -102,8 +110,8 @@ std::unique_ptr<FunctionSignatureAST> Parser::parseFunctionSignature() {
   return std::move(funcSignature);
 }
 
-std::unique_ptr<FunctionBodyAST> Parser::parseFunctionBody() {
-  auto funcBody = std::make_unique<FunctionBodyAST>();
+std::unique_ptr<FunctionBodyNode> Parser::parseFunctionBody() {
+  auto funcBody = std::make_unique<FunctionBodyNode>();
 
   std::cout << "Parsing function body..." << std::endl;
   if (currentToken.type != tok_left_brace) {
@@ -118,16 +126,7 @@ std::unique_ptr<FunctionBodyAST> Parser::parseFunctionBody() {
       return nullptr;
     }
     if (currentToken.type == tok_return) {
-      currentToken = lexer.getNextToken(); // Consume 'return'
-      auto returnExpr = std::make_unique<ReturnAST>();
-
-      std::unique_ptr<ExprAST> expr = parseExpression();
-      if (!expr) {
-        std::cerr << "Expected expression after 'return'" << std::endl;
-        return nullptr;
-      }
-
-      returnExpr->expression = std::move(expr);
+      auto returnExpr = parseReturnExpression();
       funcBody->expressions.push_back(std::move(returnExpr));
     } else {
       std::cerr << "Expected expression in function body but found:"
@@ -146,12 +145,26 @@ std::unique_ptr<FunctionBodyAST> Parser::parseFunctionBody() {
   return std::move(funcBody);
 }
 
-std::unique_ptr<ExprAST> Parser::parseExpression() {
-  std::unique_ptr<ExprAST> expr;
+std::unique_ptr<ReturnNode> Parser::parseReturnExpression() {
+  currentToken = lexer.getNextToken(); // Consume 'return'
+  auto returnExpr = std::make_unique<ReturnNode>();
+
+  std::unique_ptr<ExprNode> expr = parseExpression();
+  if (!expr) {
+    std::cerr << "Expected expression after 'return'" << std::endl;
+    return nullptr;
+  }
+
+  returnExpr->expression = std::move(expr);
+  return std::move(returnExpr);
+}
+
+std::unique_ptr<ExprNode> Parser::parseExpression() {
+  std::unique_ptr<ExprNode> expr;
   if (currentToken.type == tok_identifier) {
-    expr = std::make_unique<VariableAST>(currentToken.identifierName);
+    expr = std::make_unique<VariableNode>(currentToken.identifierName);
   } else if (currentToken.type == tok_int) {
-    expr = std::make_unique<IntAST>(currentToken.intValue);
+    expr = std::make_unique<IntNode>(currentToken.intValue);
   } else {
     std::cerr << "Expected expression after 'return' but found: "
               << currentToken.type << std::endl;

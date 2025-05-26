@@ -2,32 +2,34 @@
 #define FUNCTION_SIGNATURE_AST_H
 
 #include "ASTNode.h"
-#include "ArgumentAST.h"
+#include "ArgumentNode.h"
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 
-class FunctionSignatureAST : public ASTNode {
+class FunctionSignatureNode : public ASTNode {
 public:
   std::string name;
-  std::vector<std::unique_ptr<ArgumentAST>> parameters;
+  std::vector<std::unique_ptr<ArgumentNode>> parameters;
   std::string returnType;
-  FunctionSignatureAST() {
+  FunctionSignatureNode() {
     // Default constructor
     this->name = "";
     this->returnType = "";
-    this->parameters = std::vector<std::unique_ptr<ArgumentAST>>();
+    this->parameters = std::vector<std::unique_ptr<ArgumentNode>>();
   };
   void print(int depth) const override {
     // show the same number of hyphen as the depth
     printBranch(depth);
-    std::cout << "FunctionSignatureAST: \"" << name << "\" with return type \""
+    std::cout << "FunctionSignatureNode: \"" << name << "\" with return type \""
               << returnType << "\"" << std::endl;
     for (const auto &param : parameters) {
       param->print(depth + 1);
     }
   }
+  void codegen(const std::unique_ptr<llvm::LLVMContext> &context,
+               const std::unique_ptr<llvm::Module> &module) const override {}
 };
 
 #endif // FUNCTION_SIGNATURE_AST_H

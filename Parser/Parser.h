@@ -1,32 +1,33 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "../Lexer.h"
+#include "../Lexer/Lexer.h"
 #include "AST/ASTNode.h"
-#include "AST/ExprAST.h"
+#include "AST/ExprNode.h"
 #include "AST/FileASTNode.h"
-#include "AST/FunctionAST.h"
-#include "AST/FunctionBodyAST.h"
-#include "AST/FunctionCallAST.h"
-#include "AST/FunctionSignatureAST.h" // Include the new header file
-#include "AST/IntAST.h"
-#include "AST/ReturnAST.h"
-#include "AST/VariableAST.h"
+#include "AST/FunctionBodyNode.h"
+#include "AST/FunctionCallNode.h"
+#include "AST/FunctionNode.h"
+#include "AST/FunctionSignatureNode.h" // Include the new header file
+#include "AST/IntNode.h"
+#include "AST/ReturnNode.h"
+#include "AST/VariableNode.h"
 #include <iostream>
 #include <memory>
 
 class Parser {
-  FileASTNode root;
   Lexer &lexer;
   Token currentToken;
-  std::unique_ptr<FunctionSignatureAST> parseFunctionSignature();
-  std::vector<std::unique_ptr<ArgumentAST>> parseParameterList();
-  std::unique_ptr<FunctionBodyAST> parseFunctionBody();
-  std::unique_ptr<ExprAST> parseExpression();
+  std::unique_ptr<FunctionSignatureNode> parseFunctionSignature();
+  std::vector<std::unique_ptr<ArgumentNode>> parseParameterList();
+  std::unique_ptr<ArgumentNode> parseArgument();
+  std::unique_ptr<FunctionBodyNode> parseFunctionBody();
+  std::unique_ptr<ReturnNode> parseReturnExpression();
+  std::unique_ptr<ExprNode> parseExpression();
 
 public:
+  std::unique_ptr<FileASTNode> root;
   Parser(Lexer &lexer);
-  void printAST() const;
 };
 
 #endif

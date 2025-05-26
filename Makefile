@@ -1,8 +1,14 @@
 # Compiler
 CXX = clang++
 
+LLVM_CONFIG = llvm-config
+LLVM_CXXFLAGS = $(shell $(LLVM_CONFIG) --cxxflags)
+LLVM_LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags)
+LLVM_LIBS = $(shell $(LLVM_CONFIG) --libs core irreader support)
+LLVM_SYSTEM_LIBS = $(shell $(LLVM_CONFIG) --system-libs)
+
 # Compiler flags
-CXXFLAGS = -Wall -Wextra -g -v -std=c++17
+CXXFLAGS = -Wall -Wextra -g -v -std=c++17 $(LLVM_CXXFLAGS)
 
 # Target executable
 TARGET = $(OBJDIR)/main
@@ -20,7 +26,7 @@ OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(LLVM_SYSTEM_LIBS)
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
