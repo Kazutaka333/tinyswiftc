@@ -51,6 +51,20 @@ int main() {
 
   module->setDataLayout(TargetMachine->createDataLayout());
 
+  // Create function type: int main()
+  llvm::FunctionType *funcType =
+      llvm::FunctionType::get(llvm::Type::getInt32Ty(*context), false);
+
+  // Create function
+  llvm::Function *mainFunc = llvm::Function::Create(
+      funcType, llvm::Function::ExternalLinkage, "main", *module);
+
+  // Create entry basic block
+  llvm::BasicBlock *entry = llvm::BasicBlock::Create(*context, "", mainFunc);
+
+  builder->SetInsertPoint(entry);
+  builder->CreateRet(builder->getInt32(3)); // Return 0
+
   // write LLVM IR
   auto IRFileName = "output.ll";
   std::error_code IREC;
@@ -61,11 +75,6 @@ int main() {
   std::error_code EC;
   llvm::raw_fd_ostream dest(FileName, EC, llvm::sys::fs::OpenFlags::OF_None);
 
-  if (EC) {
-    llvm::errs() << "Could not open file: " << EC.message();
-    return 1;
-  }
-
   llvm::legacy::PassManager pass;
   auto FileType = llvm::CodeGenFileType::ObjectFile;
 
@@ -73,11 +82,8 @@ int main() {
     llvm::errs() << "TargetMachine can't emit a file of this type";
     return 1;
   }
-
   pass.run(*module);
   dest.flush();
-
-  return 0;
 
   return 0;
 }

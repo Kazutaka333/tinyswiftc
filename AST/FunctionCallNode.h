@@ -20,8 +20,8 @@ public:
       arg->print(depth + 1);
     }
   }
-  void codegen(const std::unique_ptr<llvm::LLVMContext> &context,
-               const std::unique_ptr<llvm::Module> &module) const override {}
+  void codegen(llvm::LLVMContext &context, llvm::Module &module,
+               llvm::IRBuilder<> &builder) const override {}
 };
 
 #endif // FUNCTION_CALL_AST_H

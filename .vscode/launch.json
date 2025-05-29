@@ -9,7 +9,7 @@
       "preLaunchTask": "make",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceRoot}/build/main",
+      "program": "${workspaceRoot}/build/tinyswiftc",
       "args": [],
       "env": [],
       "cwd": "${workspaceRoot}"

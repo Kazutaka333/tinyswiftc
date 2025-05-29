@@ -1,17 +1,17 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "../AST/ASTNode.h"
+#include "../AST/ExprNode.h"
+#include "../AST/FileASTNode.h"
+#include "../AST/FunctionBodyNode.h"
+#include "../AST/FunctionCallNode.h"
+#include "../AST/FunctionNode.h"
+#include "../AST/FunctionSignatureNode.h" // Include the new header file
+#include "../AST/IntNode.h"
+#include "../AST/ReturnNode.h"
+#include "../AST/VariableNode.h"
 #include "../Lexer/Lexer.h"
-#include "AST/ASTNode.h"
-#include "AST/ExprNode.h"
-#include "AST/FileASTNode.h"
-#include "AST/FunctionBodyNode.h"
-#include "AST/FunctionCallNode.h"
-#include "AST/FunctionNode.h"
-#include "AST/FunctionSignatureNode.h" // Include the new header file
-#include "AST/IntNode.h"
-#include "AST/ReturnNode.h"
-#include "AST/VariableNode.h"
 #include <iostream>
 #include <memory>
 

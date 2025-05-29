@@ -1,9 +1,9 @@
 #include "Parser.h"
+#include "../AST/ArgumentNode.h"
+#include "../AST/FileASTNode.h"
+#include "../AST/FunctionSignatureNode.h"
+#include "../AST/ReturnNode.h"
 #include "../Lexer/Lexer.h"
-#include "AST/ArgumentNode.h"
-#include "AST/FileASTNode.h"
-#include "AST/FunctionSignatureNode.h"
-#include "AST/ReturnNode.h"
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -22,6 +22,9 @@ Parser::Parser(Lexer &lexer)
       func->body = parseFunctionBody();
 
       root->children.push_back(std::move(func));
+    } else if (currentToken.type == tok_int) {
+      auto intNode = std::make_unique<IntNode>(currentToken.intValue);
+      root->children.push_back(std::move(intNode));
     }
   }
 
@@ -30,16 +33,13 @@ Parser::Parser(Lexer &lexer)
 
 std::vector<std::unique_ptr<ArgumentNode>> Parser::parseParameterList() {
   auto params = std::vector<std::unique_ptr<ArgumentNode>>();
-  while (true) {
+  while (currentToken.type != tok_right_paren) {
     auto param = parseArgument();
-    params.push_back(std::move(param));
+    if (param) {
+      params.push_back(std::move(param));
+    }
     if (currentToken.type == tok_comma) {
       currentToken = lexer.getNextToken(); // Consume ','
-    } else if (currentToken.type == tok_right_paren) {
-      break; // End of parameters
-    } else {
-      std::cerr << "Expected ',' or ')'" << std::endl;
-      return params;
     }
   }
   currentToken = lexer.getNextToken(); // Consume ')'
@@ -69,7 +69,6 @@ std::unique_ptr<ArgumentNode> Parser::parseArgument() {
 }
 
 std::unique_ptr<FunctionSignatureNode> Parser::parseFunctionSignature() {
-  std::cout << "Parsing function signature..." << std::endl;
   auto funcSignature = std::make_unique<FunctionSignatureNode>();
 
   std::string funcName;
@@ -87,12 +86,7 @@ std::unique_ptr<FunctionSignatureNode> Parser::parseFunctionSignature() {
     return nullptr;
   }
   currentToken = lexer.getNextToken(); // Consume '('
-  if (currentToken.type == tok_right_paren) {
-    // No parameters
-    funcSignature->parameters = std::vector<std::unique_ptr<ArgumentNode>>();
-  } else {
-    funcSignature->parameters = parseParameterList();
-  }
+  funcSignature->parameters = parseParameterList();
 
   if (currentToken.type == tok_arrow) {
     currentToken = lexer.getNextToken(); // Consume '->'
@@ -113,9 +107,9 @@ std::unique_ptr<FunctionSignatureNode> Parser::parseFunctionSignature() {
 std::unique_ptr<FunctionBodyNode> Parser::parseFunctionBody() {
   auto funcBody = std::make_unique<FunctionBodyNode>();
 
-  std::cout << "Parsing function body..." << std::endl;
   if (currentToken.type != tok_left_brace) {
-    std::cerr << "Expected '{' to start function body" << std::endl;
+    std::cerr << "Expected '{' to start function body but found "
+              << currentToken.type << std::endl;
     return nullptr;
   }
   currentToken = lexer.getNextToken(); // Consume '{'

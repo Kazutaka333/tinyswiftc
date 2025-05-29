@@ -11,7 +11,7 @@ LLVM_SYSTEM_LIBS = $(shell $(LLVM_CONFIG) --system-libs)
 CXXFLAGS = -Wall -Wextra -g -v -std=c++17 $(LLVM_CXXFLAGS)
 
 # Target executable
-TARGET = $(OBJDIR)/main
+TARGET = $(OBJDIR)/tinyswiftc
 
 # Source files
 SRCS = $(shell find . -name '*.cpp')
@@ -23,7 +23,7 @@ OBJDIR = build
 OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
 
 # Build target
-all: $(TARGET)
+all: $(TARGET) output
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(LLVM_SYSTEM_LIBS)
@@ -32,6 +32,13 @@ $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+output: output.o
+	clang output.o -o output
+
 # Clean up build files
 clean:
 	rm -rf $(OBJDIR)
+
+test: 
+	@echo "Running tests..."
+	./test.sh
