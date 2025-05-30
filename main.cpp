@@ -11,9 +11,13 @@
 #include <llvm/TargetParser/Host.h>
 #include <memory>
 
-int main() {
+int main(int argc, char *argv[]) {
   // Your code to use the lexer functionality goes here
-  std::string fileName = "example.swift";
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " <input_file>\n";
+    return 1;
+  }
+  std::string fileName = argv[1];
   Lexer lexer = Lexer(fileName);
   std::optional<Token> token;
 
@@ -51,27 +55,15 @@ int main() {
 
   module->setDataLayout(TargetMachine->createDataLayout());
 
-  // Create function type: int main()
-  llvm::FunctionType *funcType =
-      llvm::FunctionType::get(llvm::Type::getInt32Ty(*context), false);
-
-  // Create function
-  llvm::Function *mainFunc = llvm::Function::Create(
-      funcType, llvm::Function::ExternalLinkage, "main", *module);
-
-  // Create entry basic block
-  llvm::BasicBlock *entry = llvm::BasicBlock::Create(*context, "", mainFunc);
-
-  builder->SetInsertPoint(entry);
-  builder->CreateRet(builder->getInt32(3)); // Return 0
+  parser.root->codegen(*context, *module, *builder);
 
   // write LLVM IR
-  auto IRFileName = "output.ll";
+  auto IRFileName = "build/output.ll";
   std::error_code IREC;
   llvm::raw_fd_ostream irOutput(IRFileName, IREC);
   module->print(irOutput, nullptr);
 
-  auto FileName = "output.o";
+  auto FileName = "build/output.o";
   std::error_code EC;
   llvm::raw_fd_ostream dest(FileName, EC, llvm::sys::fs::OpenFlags::OF_None);
 

@@ -21,6 +21,12 @@ public:
     }
   }
   void codegen(llvm::LLVMContext &context, llvm::Module &module,
-               llvm::IRBuilder<> &builder) const override {}
+               llvm::IRBuilder<> &builder) const override {
+    for (const auto &child : children) {
+      if (child) {
+        child->codegen(context, module, builder);
+      }
+    }
+  }
 };
 #endif // FILE_AST_NODE_H

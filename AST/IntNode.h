@@ -17,14 +17,19 @@ public:
 
   void codegen(llvm::LLVMContext &context, llvm::Module &module,
                llvm::IRBuilder<> &builder) const override {
-    auto mainType = llvm::FunctionType::get(builder.getInt32Ty(), false);
-    auto mainFunc = llvm::Function::Create(
-        mainType, llvm::Function::ExternalLinkage, "main", module);
+    // Create function type: int main()
+    llvm::FunctionType *funcType =
+        llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
+
+    // Create function
+    llvm::Function *mainFunc = llvm::Function::Create(
+        funcType, llvm::Function::ExternalLinkage, "main", module);
 
     // Create entry basic block
     llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "", mainFunc);
 
-    builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(32, 1)));
+    builder.SetInsertPoint(entry);
+    builder.CreateRet(builder.getInt32(value)); // Return 0
   }
 };
 

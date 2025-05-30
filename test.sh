@@ -3,9 +3,10 @@ assert() {
   input="$1"
   expected="$2"
   
-
-  ./build/tinyswiftc "$input" || exit
-  ./output.o
+  echo $1 > build/example.swift
+  ./build/tinyswiftc build/example.swift || exit
+  clang build/output.o -o build/output
+  ./build/output
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then
@@ -16,7 +17,7 @@ assert() {
   fi
 }
 
-assert "func main() -> Int { return 0 }" 0
-assert "func main() -> Int { return 1 }" 42
+assert "0" 0
+assert "42" 42
 
 echo OK

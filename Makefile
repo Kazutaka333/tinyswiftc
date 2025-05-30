@@ -23,7 +23,7 @@ OBJDIR = build
 OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
 
 # Build target
-all: $(TARGET) output
+all: $(TARGET) 
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(LLVM_SYSTEM_LIBS)
@@ -32,8 +32,7 @@ $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-output: output.o
-	clang output.o -o output
+
 
 # Clean up build files
 clean:

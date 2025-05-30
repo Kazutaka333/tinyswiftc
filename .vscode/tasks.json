@@ -9,6 +9,13 @@
       "command": "make clean && make",
     },
     {
+      "label": "build",
+      "type": "shell",
+      "command": "make build",
+      "dependsOn": "make",
+      "problemMatcher": []
+    },
+    {
       "label": "test",
       "type": "shell",
       "command": "make test",
