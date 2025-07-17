@@ -3,6 +3,7 @@
 
 #include "ASTNode.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 
 class ArgumentNode : public ASTNode {
@@ -15,11 +16,10 @@ public:
     this->type = type;
   };
   void print(int depth) const override {
-    printBranch(depth);
-    std::cout << "ArgumentNode: " << name << " of type " << type << std::endl;
+    debug_log(getBranch(depth), "ArgumentNode:", name, "of type", type);
   }
   void codegen(llvm::LLVMContext &context, llvm::Module &module,
-               llvm::IRBuilder<> &builder) const override {}
+               llvm::IRBuilder<> &builder) const {}
 };
 
 #endif // ARGUMENT_AST_H

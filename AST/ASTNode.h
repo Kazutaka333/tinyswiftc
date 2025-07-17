@@ -1,6 +1,7 @@
 #ifndef ASTNODE_H
 #define ASTNODE_H
 
+#include "../Util/debug_log.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include <iostream>
@@ -10,11 +11,8 @@ class ASTNode {
 public:
   virtual ~ASTNode() = default;
   virtual void print(int depth = 0) const = 0;
-  virtual void codegen(llvm::LLVMContext &context, llvm::Module &module,
-                       llvm::IRBuilder<> &builder) const = 0;
-  void printBranch(int depth) const {
-    std::cout << std::string(depth * 2, ' ');
-    std::cout << "└ ";
+  std::string getBranch(int depth) const {
+    return std::string(depth * 2, ' ') + "└ ";
   }
 };
 

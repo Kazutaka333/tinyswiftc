@@ -20,11 +20,7 @@ Parser::Parser(Lexer &lexer)
       auto func = std::make_unique<FunctionNode>();
       func->signature = parseFunctionSignature();
       func->body = parseFunctionBody();
-
       root->children.push_back(std::move(func));
-    } else if (currentToken.type == tok_int) {
-      auto intNode = std::make_unique<IntNode>(currentToken.intValue);
-      root->children.push_back(std::move(intNode));
     }
   }
 
@@ -128,7 +124,6 @@ std::unique_ptr<FunctionBodyNode> Parser::parseFunctionBody() {
 
       return nullptr;
     }
-    currentToken = lexer.getNextToken(); // Consume expression
   }
 
   if (currentToken.type != tok_right_brace) {
@@ -160,9 +155,23 @@ std::unique_ptr<ExprNode> Parser::parseExpression() {
   } else if (currentToken.type == tok_int) {
     expr = std::make_unique<IntNode>(currentToken.intValue);
   } else {
-    std::cerr << "Expected expression after 'return' but found: "
-              << currentToken.type << std::endl;
+    std::cerr << "Failed to parse expression: found " << currentToken.type
+              << std::endl;
     return nullptr;
   }
+  currentToken = lexer.getNextToken(); // Consume expression / left operand
+  if (currentToken.type == tok_plus) {
+    auto binOpNode = parseBinaryOpExpression();
+    binOpNode->left = std::move(expr);
+    return std::move(binOpNode);
+  }
   return std::move(expr);
+}
+
+std::unique_ptr<BinaryOpNode> Parser::parseBinaryOpExpression() {
+  auto binOpNode = std::make_unique<BinaryOpNode>();
+  binOpNode->op = currentToken.identifierName;
+  currentToken = lexer.getNextToken(); // Consume the operator
+  binOpNode->right = parseExpression();
+  return std::move(binOpNode);
 }

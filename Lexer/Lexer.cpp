@@ -40,6 +40,8 @@ Token Lexer::getNextToken() {
       return Token(tok_left_brace, buffer);
     if (ch == '}')
       return Token(tok_right_brace, buffer);
+    if (ch == '+')
+      return Token(tok_plus, buffer);
     if (buffer == "->")
       return Token(tok_arrow, buffer);
     char nextChar = file.peek();
@@ -56,6 +58,13 @@ Token Lexer::getNextToken() {
     }
   }
   return Token(tok_eof);
+}
+
+Token Lexer::peekNextToken() {
+  std::streampos currentPos = file.tellg();
+  Token nextToken = getNextToken();
+  file.seekg(currentPos);
+  return nextToken;
 }
 
 std::ostream &operator<<(std::ostream &os, TokenType type) {

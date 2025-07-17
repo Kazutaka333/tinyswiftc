@@ -17,7 +17,17 @@ int main(int argc, char *argv[]) {
     std::cerr << "Usage: " << argv[0] << " <input_file>\n";
     return 1;
   }
-  std::string fileName = argv[1];
+  // check if --debug flag is supplied
+
+  std::string fileName;
+  for (int i = 1; i < argc; ++i) {
+    if (std::string(argv[i]) == "--debug") {
+      debugEnabled = true;
+    } else {
+      fileName = argv[i];
+    }
+  }
+
   Lexer lexer = Lexer(fileName);
   std::optional<Token> token;
 

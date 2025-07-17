@@ -10,11 +10,10 @@ public:
   std::string name;
   VariableNode(const std::string &name) : name(name) {}
   void print(int depth) const override {
-    printBranch(depth);
-    std::cout << "VariableNode: " << name << std::endl;
+    debug_log(getBranch(depth), "VariableNode: ", name);
   }
-  void codegen(llvm::LLVMContext &context, llvm::Module &module,
-               llvm::IRBuilder<> &builder) const override {}
+  llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
+                       llvm::IRBuilder<> &builder) const override {}
 };
 
 #endif // VARIABLE_AST_H

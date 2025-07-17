@@ -18,6 +18,8 @@ enum TokenType {
   tok_left_brace,
   tok_right_brace,
   tok_int,
+  tok_plus,
+  tok_minus,
 };
 
 std::ostream &operator<<(std::ostream &os, TokenType type);
@@ -41,5 +43,6 @@ class Lexer {
 public:
   Lexer(const std::string &filename);
   Token getNextToken();
+  Token peekNextToken();
 };
 #endif

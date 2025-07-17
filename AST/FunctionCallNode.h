@@ -14,14 +14,13 @@ public:
   FunctionCallNode(const std::string &functionName)
       : functionName(functionName) {}
   void print(int depth) const override {
-    printBranch(depth);
-    std::cout << "FunctionCallNode: " << functionName << std::endl;
+    debug_log(getBranch(depth), "FunctionCallNode: ", functionName);
     for (const auto &arg : arguments) {
       arg->print(depth + 1);
     }
   }
-  void codegen(llvm::LLVMContext &context, llvm::Module &module,
-               llvm::IRBuilder<> &builder) const override {}
+  llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
+                       llvm::IRBuilder<> &builder) const override {}
 };
 
 #endif // FUNCTION_CALL_AST_H

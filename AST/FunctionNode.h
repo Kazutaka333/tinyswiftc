@@ -13,7 +13,7 @@ public:
   std::unique_ptr<FunctionBodyNode> body;
   FunctionNode() = default;
   void print(int depth = 0) const override {
-    std::cout << "FunctionNode:" << std::endl;
+    debug_log(getBranch(depth), "FunctionNode:");
     if (signature) {
       signature->print(depth + 1);
     }
@@ -21,8 +21,15 @@ public:
       body->print(depth + 1);
     }
   }
-  void codegen(llvm::LLVMContext &context, llvm::Module &module,
-               llvm::IRBuilder<> &builder) const override {}
+  llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
+                       llvm::IRBuilder<> &builder) const {
+    auto func = signature->codegen(context, module, builder);
+    // Create entry basic block
+    llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "", func);
+
+    builder.SetInsertPoint(entry);
+    body->codegen(context, module, builder);
+  }
 };
 
 #endif // FUNCTION_AST_H

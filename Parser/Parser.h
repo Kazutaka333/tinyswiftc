@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include "../AST/ASTNode.h"
+#include "../AST/BinaryOpNode.h"
 #include "../AST/ExprNode.h"
 #include "../AST/FileASTNode.h"
 #include "../AST/FunctionBodyNode.h"
@@ -24,6 +25,7 @@ class Parser {
   std::unique_ptr<FunctionBodyNode> parseFunctionBody();
   std::unique_ptr<ReturnNode> parseReturnExpression();
   std::unique_ptr<ExprNode> parseExpression();
+  std::unique_ptr<BinaryOpNode> parseBinaryOpExpression();
 
 public:
   std::unique_ptr<FileASTNode> root;

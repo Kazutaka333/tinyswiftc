@@ -10,7 +10,9 @@
       "request": "launch",
       "name": "Debug",
       "program": "${workspaceRoot}/build/tinyswiftc",
-      "args": [],
+      "args": [
+        "example.swift"
+      ],
       "env": [],
       "cwd": "${workspaceRoot}"
     }
