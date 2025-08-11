@@ -12,23 +12,23 @@ public:
   std::unique_ptr<FunctionSignatureNode> signature;
   std::unique_ptr<FunctionBodyNode> body;
   FunctionNode() = default;
-  void print(int depth = 0) const override {
-    debug_log(getBranch(depth), "FunctionNode:");
+  void print(int Depth = 0) const override {
+    debug_log(getBranch(Depth), "FunctionNode:");
     if (signature) {
-      signature->print(depth + 1);
+      signature->print(Depth + 1);
     }
     if (body) {
-      body->print(depth + 1);
+      body->print(Depth + 1);
     }
   }
-  llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
-                       llvm::IRBuilder<> &builder) const {
-    auto func = signature->codegen(context, module, builder);
+  void codegen(llvm::LLVMContext &Context, llvm::Module &Module,
+               llvm::IRBuilder<> &Builder) const {
+    auto func = signature->codegen(Context, Module, Builder);
     // Create entry basic block
-    llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "", func);
+    llvm::BasicBlock *entry = llvm::BasicBlock::Create(Context, "", func);
 
-    builder.SetInsertPoint(entry);
-    body->codegen(context, module, builder);
+    Builder.SetInsertPoint(entry);
+    body->codegen(Context, Module, Builder);
   }
 };
 

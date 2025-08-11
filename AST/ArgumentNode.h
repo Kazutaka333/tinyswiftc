@@ -15,11 +15,11 @@ public:
     this->name = name;
     this->type = type;
   };
-  void print(int depth) const override {
-    debug_log(getBranch(depth), "ArgumentNode:", name, "of type", type);
+  void print(int Depth) const override {
+    debug_log(getBranch(Depth), "ArgumentNode:", name, "of type", type);
   }
-  void codegen(llvm::LLVMContext &context, llvm::Module &module,
-               llvm::IRBuilder<> &builder) const {}
+  void codegen(llvm::LLVMContext &Context, llvm::Module &Module,
+               llvm::IRBuilder<> &Builder) const {}
 };
 
 #endif // ARGUMENT_AST_H

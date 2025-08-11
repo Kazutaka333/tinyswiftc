@@ -1,1 +1,1 @@
-func main() -> Int { return 2 }
+func main() -> Int { return 0 }

@@ -22,12 +22,14 @@ Token Lexer::getNextToken() {
   std::string buffer;
   buffer.clear();
   // skip leading spacing characters
-  while (isspace(file.peek())) {
+  while (isspace(file.peek()))
     file.get(ch);
-  }
+
   // scan for token
   while (file.get(ch)) {
     buffer += ch;
+    char nextChar = file.peek();
+
     if (ch == '(')
       return Token(tok_left_paren, buffer);
     if (ch == ')')
@@ -42,9 +44,14 @@ Token Lexer::getNextToken() {
       return Token(tok_right_brace, buffer);
     if (ch == '+')
       return Token(tok_plus, buffer);
+    if (ch == '-' && nextChar != '>')
+      return Token(tok_minus, buffer);
+    if (ch == '*')
+      return Token(tok_multiply, buffer);
+    if (ch == '/' && nextChar != '/')
+      return Token(tok_divide, buffer);
     if (buffer == "->")
       return Token(tok_arrow, buffer);
-    char nextChar = file.peek();
     if (isspace(nextChar) || delimiters.find(nextChar) != delimiters.end()) {
       if (buffer == "func")
         return Token(tok_func, buffer);

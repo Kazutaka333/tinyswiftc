@@ -7,8 +7,8 @@
 class ExprNode : public ASTNode {
 public:
   ExprNode() = default;
-  virtual llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
-                               llvm::IRBuilder<> &builder) const = 0;
+  virtual llvm::Value *codegen(llvm::LLVMContext &Context, llvm::Module &Module,
+                               llvm::IRBuilder<> &Builder) const = 0;
 };
 
 #endif // EXPR_AST_H

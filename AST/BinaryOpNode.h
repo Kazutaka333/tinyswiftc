@@ -1,25 +1,35 @@
 #include "ExprNode.h"
+#include <iostream>
 #include <sstream>
 class BinaryOpNode : public ExprNode {
 public:
-  std::unique_ptr<ExprNode> left;
-  std::unique_ptr<ExprNode> right;
-  std::string op;
+  std::unique_ptr<ExprNode> Left;
+  std::unique_ptr<ExprNode> Right;
+  std::string OP;
   BinaryOpNode() = default;
 
-  void print(int depth) const override {
-    debug_log(getBranch(depth), "BinaryOpNode: ", op);
-    if (left) {
-      left->print(depth + 1);
+  void print(int Depth) const override {
+    debug_log(getBranch(Depth), "BinaryOpNode: ", OP);
+    if (Left) {
+      Left->print(Depth + 1);
     }
-    if (right) {
-      right->print(depth + 1);
+    if (Right) {
+      Right->print(Depth + 1);
     }
   }
 
-  llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
-                       llvm::IRBuilder<> &builder) const override {
-
-    return builder.getInt32(0); // Return 0
+  llvm::Value *codegen(llvm::LLVMContext &Context, llvm::Module &Module,
+                       llvm::IRBuilder<> &Builder) const override {
+    llvm::Value *LeftVal = Left->codegen(Context, Module, Builder);
+    llvm::Value *RightVal = Right->codegen(Context, Module, Builder);
+    if (OP == "+") {
+      return Builder.CreateAdd(LeftVal, RightVal);
+    } else if (OP == "-") {
+      return Builder.CreateSub(LeftVal, RightVal);
+    } else if (OP == "*") {
+      return Builder.CreateMul(LeftVal, RightVal);
+    } else {
+      std::cerr << "Unknown Binary Operator " << OP << std::endl;
+    }
   }
 };

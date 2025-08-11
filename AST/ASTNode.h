@@ -10,9 +10,9 @@
 class ASTNode {
 public:
   virtual ~ASTNode() = default;
-  virtual void print(int depth = 0) const = 0;
-  std::string getBranch(int depth) const {
-    return std::string(depth * 2, ' ') + "└ ";
+  virtual void print(int Depth = 0) const = 0;
+  std::string getBranch(int Depth) const {
+    return std::string(Depth * 2, ' ') + "└ ";
   }
 };
 

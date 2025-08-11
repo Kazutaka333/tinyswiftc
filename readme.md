@@ -47,6 +47,13 @@ echo $?   # Should print 42
 make
 ```
 
+### Run compiler and create an executable
+```
+./build/tinyswiftc input.swift
+clang build/output.o -o build/output
+./build/output 
+```
+
 ### Run Tests
 
 ```sh

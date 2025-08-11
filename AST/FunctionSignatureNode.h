@@ -20,29 +20,29 @@ public:
     this->returnType = "";
     this->parameters = std::vector<std::unique_ptr<ArgumentNode>>();
   };
-  std::string getBranch(int depth) const {
-    return std::string(depth * 2, ' ') + "└ ";
+  std::string getBranch(int Depth) const {
+    return std::string(Depth * 2, ' ') + "└ ";
   }
-  void print(int depth) const {
-    // show the same number of hyphen as the depth
-    debug_log(getBranch(depth), "FunctionSignatureNode: \"", name,
+  void print(int Depth) const {
+    // show the same number of hyphen as the Depth
+    debug_log(getBranch(Depth), "FunctionSignatureNode: \"", name,
               "\" with return type \"", returnType, "\"");
     for (const auto &param : parameters) {
-      param->print(depth + 1);
+      param->print(Depth + 1);
     }
   }
-  llvm::Function *codegen(llvm::LLVMContext &context, llvm::Module &module,
-                          llvm::IRBuilder<> &builder) const {
+  llvm::Function *codegen(llvm::LLVMContext &Context, llvm::Module &Module,
+                          llvm::IRBuilder<> &Builder) const {
     if (returnType != "Int") {
       std::cerr << "Unsupported return type: " << returnType << std::endl;
       return nullptr;
     }
     llvm::FunctionType *funcType =
-        llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
+        llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
 
     // Create function
     return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
-                                  "main", module);
+                                  "main", Module);
   }
 };
 

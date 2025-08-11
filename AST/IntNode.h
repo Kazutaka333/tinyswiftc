@@ -10,14 +10,14 @@ public:
   int value;
   IntNode(int value) : value(value) {}
 
-  void print(int depth) const override {
-    debug_log(getBranch(depth), "IntNode: ", value);
+  void print(int Depth) const override {
+    debug_log(getBranch(Depth), "IntNode: ", value);
   }
 
-  llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
-                       llvm::IRBuilder<> &builder) const override {
+  llvm::Value *codegen(llvm::LLVMContext &Context, llvm::Module &Module,
+                       llvm::IRBuilder<> &Builder) const override {
 
-    return builder.getInt32(value); // Return 0
+    return Builder.getInt32(value); // Return 0
   }
 };
 

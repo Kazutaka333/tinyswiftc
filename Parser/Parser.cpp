@@ -5,7 +5,9 @@
 #include "../AST/ReturnNode.h"
 #include "../Lexer/Lexer.h"
 #include <cstddef>
+#include <map>
 #include <memory>
+#include <utility>
 #include <vector>
 
 Parser::Parser(Lexer &lexer)
@@ -26,6 +28,13 @@ Parser::Parser(Lexer &lexer)
 
   root->print();
 }
+
+static std::map<std::string, int> PrecedenceTable = {
+    {"*", 0},
+    {"/", 0},
+    {"+", 1},
+    {"-", 1},
+};
 
 std::vector<std::unique_ptr<ArgumentNode>> Parser::parseParameterList() {
   auto params = std::vector<std::unique_ptr<ArgumentNode>>();
@@ -159,19 +168,38 @@ std::unique_ptr<ExprNode> Parser::parseExpression() {
               << std::endl;
     return nullptr;
   }
-  currentToken = lexer.getNextToken(); // Consume expression / left operand
-  if (currentToken.type == tok_plus) {
-    auto binOpNode = parseBinaryOpExpression();
-    binOpNode->left = std::move(expr);
+  currentToken = lexer.getNextToken(); // Consume expression / Left operand
+  // parse Binary Operator
+  if (currentToken.type == tok_plus || currentToken.type == tok_minus ||
+      currentToken.type == tok_multiply) {
+    auto binOpNode = parseRightBinaryOpExpression();
+    BinaryOpNode *tempNode = binOpNode.get();
+    while (auto tempBinNode =
+               dynamic_cast<BinaryOpNode *>(tempNode->Left.get())) {
+      tempNode = tempBinNode;
+    }
+    tempNode->Left = std::move(expr);
     return std::move(binOpNode);
   }
   return std::move(expr);
 }
 
-std::unique_ptr<BinaryOpNode> Parser::parseBinaryOpExpression() {
+std::unique_ptr<BinaryOpNode> Parser::parseRightBinaryOpExpression() {
   auto binOpNode = std::make_unique<BinaryOpNode>();
-  binOpNode->op = currentToken.identifierName;
+  binOpNode->OP = currentToken.identifierName;
   currentToken = lexer.getNextToken(); // Consume the operator
-  binOpNode->right = parseExpression();
+  auto rightExpr = parseExpression();
+  if (auto rightBinOpNode = dynamic_cast<BinaryOpNode *>(rightExpr.get())) {
+    debug_log(currentToken.identifierName);
+    // current op is slower than right op
+    if (PrecedenceTable[binOpNode->OP] <= PrecedenceTable[rightBinOpNode->OP]) {
+      binOpNode->Right = std::move(rightBinOpNode->Left);
+      rightBinOpNode->Left = std::move(binOpNode);
+      rightExpr.release();
+      return std::unique_ptr<BinaryOpNode>(rightBinOpNode);
+    }
+  }
+  binOpNode->Right = std::move(rightExpr);
+
   return std::move(binOpNode);
 }

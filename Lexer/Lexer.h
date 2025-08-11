@@ -20,6 +20,8 @@ enum TokenType {
   tok_int,
   tok_plus,
   tok_minus,
+  tok_multiply,
+  tok_divide
 };
 
 std::ostream &operator<<(std::ostream &os, TokenType type);

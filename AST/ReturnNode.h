@@ -9,19 +9,19 @@ class ReturnNode : public ExprNode {
 public:
   std::unique_ptr<ExprNode> expression;
   ReturnNode() = default;
-  void print(int depth) const override {
-    debug_log(getBranch(depth), "ReturnNode: ");
+  void print(int Depth) const override {
+    debug_log(getBranch(Depth), "ReturnNode: ");
     if (expression) {
-      expression->print(depth + 1);
+      expression->print(Depth + 1);
     }
   }
 
-  llvm::Value *codegen(llvm::LLVMContext &context, llvm::Module &module,
-                       llvm::IRBuilder<> &builder) const override {
+  llvm::Value *codegen(llvm::LLVMContext &Context, llvm::Module &Module,
+                       llvm::IRBuilder<> &Builder) const override {
 
-    auto value = expression->codegen(context, module, builder);
+    auto value = expression->codegen(Context, Module, Builder);
 
-    return builder.CreateRet(value); // Return the value from the expression
+    return Builder.CreateRet(value); // Return the value from the expression
   }
 };
 

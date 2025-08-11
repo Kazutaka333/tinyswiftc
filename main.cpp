@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) {
   std::optional<Token> token;
 
   Parser parser(lexer);
-  auto context = std::make_unique<llvm::LLVMContext>();
-  auto module = std::make_unique<llvm::Module>(fileName, *context);
-  auto builder = std::make_unique<llvm::IRBuilder<>>(*context);
+  auto Context = std::make_unique<llvm::LLVMContext>();
+  auto Module = std::make_unique<llvm::Module>(fileName, *Context);
+  auto Builder = std::make_unique<llvm::IRBuilder<>>(*Context);
 
   llvm::InitializeAllTargetInfos();
   llvm::InitializeAllTargets();
@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
   llvm::InitializeAllAsmParsers();
   llvm::InitializeAllAsmPrinters();
   auto TargetTriple = llvm::sys::getDefaultTargetTriple();
-  // std::cout << TargetTriple << std::endl;
-  module->setTargetTriple(TargetTriple);
+
+  Module->setTargetTriple(TargetTriple);
 
   std::string Error;
   auto Target = llvm::TargetRegistry::lookupTarget(TargetTriple, Error);
@@ -63,15 +63,15 @@ int main(int argc, char *argv[]) {
   auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features,
                                                    opt, llvm::Reloc::PIC_);
 
-  module->setDataLayout(TargetMachine->createDataLayout());
+  Module->setDataLayout(TargetMachine->createDataLayout());
 
-  parser.root->codegen(*context, *module, *builder);
+  parser.root->codegen(*Context, *Module, *Builder);
 
   // write LLVM IR
   auto IRFileName = "build/output.ll";
   std::error_code IREC;
   llvm::raw_fd_ostream irOutput(IRFileName, IREC);
-  module->print(irOutput, nullptr);
+  Module->print(irOutput, nullptr);
 
   auto FileName = "build/output.o";
   std::error_code EC;
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     llvm::errs() << "TargetMachine can't emit a file of this type";
     return 1;
   }
-  pass.run(*module);
+  pass.run(*Module);
   dest.flush();
 
   return 0;

@@ -8,10 +8,22 @@
       "type": "lldb-dap",
       "preLaunchTask": "make",
       "request": "launch",
-      "name": "Debug",
+      "name": "Debug tinyswiftc compiling example.swift",
       "program": "${workspaceRoot}/build/tinyswiftc",
       "args": [
         "example.swift"
+      ],
+      "env": [],
+      "cwd": "${workspaceRoot}"
+    },
+    {
+      "type": "lldb-dap",
+      // "preLaunchTask": "make",
+      "request": "launch",
+      "name": "Debug input.swift",
+      "program": "${workspaceRoot}/build/tinyswiftc",
+      "args": [
+        "build/input.swift"
       ],
       "env": [],
       "cwd": "${workspaceRoot}"
