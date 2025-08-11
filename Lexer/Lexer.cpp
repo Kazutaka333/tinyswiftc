@@ -1,4 +1,5 @@
 #include "Lexer.h"
+#include "../Util/debug_log.h"
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -15,20 +16,34 @@ Lexer::Lexer(const std::string &filename) : filename(filename) {
   }
 }
 
+void skipSpace(std::ifstream &file) {
+  char ch;
+  while (isspace(file.peek()))
+    file.get(ch);
+}
+
 Token Lexer::getNextToken() {
   char ch;
   std::unordered_set<char> delimiters = {',', '.', '(', ')', '{',
                                          '}', ':', '-', EOF};
   std::string buffer;
   buffer.clear();
-  // skip leading spacing characters
-  while (isspace(file.peek()))
-    file.get(ch);
+  skipSpace(file);
 
   // scan for token
   while (file.get(ch)) {
     buffer += ch;
     char nextChar = file.peek();
+
+    if (buffer == "//") {
+      while (ch != '\n') {
+        file.get(ch);
+      }
+      debug_log("found new line");
+      buffer.clear();
+      skipSpace(file);
+      continue;
+    }
 
     if (ch == '(')
       return Token(tok_left_paren, buffer);
@@ -52,7 +67,10 @@ Token Lexer::getNextToken() {
       return Token(tok_divide, buffer);
     if (buffer == "->")
       return Token(tok_arrow, buffer);
+
+    // tokenizing keyword or identifier
     if (isspace(nextChar) || delimiters.find(nextChar) != delimiters.end()) {
+      debug_log(",", buffer, ",");
       if (buffer == "func")
         return Token(tok_func, buffer);
       if (buffer == "return")

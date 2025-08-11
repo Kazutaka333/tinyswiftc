@@ -129,7 +129,8 @@ std::unique_ptr<FunctionBodyNode> Parser::parseFunctionBody() {
       funcBody->expressions.push_back(std::move(returnExpr));
     } else {
       std::cerr << "Expected expression in function body but found:"
-                << currentToken.type << std::endl;
+                << currentToken.type << currentToken.identifierName
+                << std::endl;
 
       return nullptr;
     }
