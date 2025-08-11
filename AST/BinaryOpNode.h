@@ -28,6 +28,8 @@ public:
       return Builder.CreateSub(LeftVal, RightVal);
     } else if (OP == "*") {
       return Builder.CreateMul(LeftVal, RightVal);
+    } else if (OP == "/") {
+      return Builder.CreateSDiv(LeftVal, RightVal);
     } else {
       std::cerr << "Unknown Binary Operator " << OP << std::endl;
     }

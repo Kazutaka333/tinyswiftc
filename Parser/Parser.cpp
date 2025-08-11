@@ -171,7 +171,7 @@ std::unique_ptr<ExprNode> Parser::parseExpression() {
   currentToken = lexer.getNextToken(); // Consume expression / Left operand
   // parse Binary Operator
   if (currentToken.type == tok_plus || currentToken.type == tok_minus ||
-      currentToken.type == tok_multiply) {
+      currentToken.type == tok_multiply || currentToken.type == tok_divide) {
     auto binOpNode = parseRightBinaryOpExpression();
     BinaryOpNode *tempNode = binOpNode.get();
     while (auto tempBinNode =

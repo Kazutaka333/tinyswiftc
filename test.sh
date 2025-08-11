@@ -44,5 +44,6 @@ assert "func main() -> Int { return 2 * 3 * 2}" 12
 assert "func main() -> Int { return 2 * 3 - 2 }" 4
 assert "func main() -> Int { return 10 + 2 * 3 - 2 }" 14
 assert "func main() -> Int { return 10 + 2 - 3 * 2 }" 6
+assert "func main() -> Int { return 10 / 2 }" 5
 
 echo OK
