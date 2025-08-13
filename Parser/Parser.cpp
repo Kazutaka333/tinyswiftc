@@ -169,6 +169,15 @@ std::unique_ptr<ExprNode> Parser::parseExpression(int parenthesisCount) {
     expr = std::make_unique<VariableNode>(currentToken.identifierName);
   } else if (currentToken.type == tok_int) {
     expr = std::make_unique<IntNode>(currentToken.intValue);
+  } else if (currentToken.type == tok_minus) {
+    // parse unary minus operator
+    currentToken = lexer.getNextToken(); // Consume minus sign
+    if (currentToken.type != tok_int || currentToken.hasLeadingSpace) {
+      std::cerr << "- unary operator cannot be separated from its operand"
+                << std::endl;
+      return nullptr;
+    }
+    expr = std::make_unique<IntNode>(-currentToken.intValue);
   } else {
     std::cerr << "Failed to parse expression: found " << currentToken.type
               << std::endl;

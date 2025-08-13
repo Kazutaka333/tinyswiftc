@@ -12,6 +12,8 @@ if [[ "$1" == "--help" || "$1" == "-h" ]]; then
 fi
 
 #!/bin/bash
+# Since assert function checks exit code of compiled program, the possible exit code range is 0-255.
+# If a negative value is returned as an exit code, the actual exit code will be 256 + <negative value>
 assert() {
   input="$1"
   expected="$2"
@@ -29,7 +31,8 @@ assert() {
   fi
   echo
 }
-# make clean && make
+
+
 assert "func main() -> Int { return 0 }" 0
 assert "func main() -> Int {return 0}" 0
 assert "func main ()->Int{return 0}" 0
@@ -39,6 +42,9 @@ assert "func main() -> Int { return 1 + 2 }" 3
 assert "func main() -> Int { return 10 + 123 }" 133
 assert "func main() -> Int { return 10 - 9 }" 1
 assert "func main() -> Int { return 255 - 241 }" 14
+assert "func main() -> Int { return 1 - 2 }" 255 # check comment on assert()
+assert "func main() -> Int { return -2 }" 254 # check comment on assert()
+assert "func main() -> Int { return 3 + -2 }" 1
 assert "func main() -> Int { return 2 * 3 }" 6
 assert "func main() -> Int { return 2 * 3 * 2}" 12
 assert "func main() -> Int { return 2 * 3 - 2 }" 4

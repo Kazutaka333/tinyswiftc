@@ -30,12 +30,13 @@ struct Token {
   TokenType type;
   std::string identifierName;
   int intValue;
+  bool hasLeadingSpace;
 
   Token() = default;
   Token(const TokenType type, const std::string &identifierName = "")
       : type(type), identifierName(identifierName) {};
-  Token(const TokenType type, const int intValue)
-      : type(type), intValue(intValue) {};
+  Token(const TokenType type, const int intValue, const bool hasLeadingSpace)
+      : type(type), intValue(intValue), hasLeadingSpace(hasLeadingSpace) {};
 };
 
 class Lexer {

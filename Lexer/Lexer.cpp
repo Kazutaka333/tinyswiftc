@@ -16,10 +16,14 @@ Lexer::Lexer(const std::string &filename) : filename(filename) {
   }
 }
 
-void skipSpace(std::ifstream &file) {
+bool skipSpace(std::ifstream &file) {
   char ch;
-  while (isspace(file.peek()))
+  bool hasSkipped = false;
+  while (isspace(file.peek())) {
     file.get(ch);
+    hasSkipped = true;
+  }
+  return hasSkipped;
 }
 
 Token Lexer::getNextToken() {
@@ -27,8 +31,8 @@ Token Lexer::getNextToken() {
   std::unordered_set<char> delimiters = {',', '.', '(', ')', '{',
                                          '}', ':', '-', EOF};
   std::string buffer;
-  buffer.clear();
-  skipSpace(file);
+  bool hasLeadingSpace;
+  hasLeadingSpace = skipSpace(file);
 
   // scan for token
   while (file.get(ch)) {
@@ -39,9 +43,8 @@ Token Lexer::getNextToken() {
       while (ch != '\n') {
         file.get(ch);
       }
-      debug_log("found new line");
       buffer.clear();
-      skipSpace(file);
+      hasLeadingSpace = skipSpace(file);
       continue;
     }
 
@@ -76,7 +79,7 @@ Token Lexer::getNextToken() {
         return Token(tok_return, buffer);
       if (std::all_of(buffer.begin(), buffer.end(), ::isdigit)) {
         int value = strtod(buffer.c_str(), 0);
-        return Token(tok_int, value);
+        return Token(tok_int, value, hasLeadingSpace);
       }
       return Token(tok_identifier, buffer);
     }
