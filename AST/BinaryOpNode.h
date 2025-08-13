@@ -6,10 +6,12 @@ public:
   std::unique_ptr<ExprNode> Left;
   std::unique_ptr<ExprNode> Right;
   std::string OP;
-  BinaryOpNode() = default;
+  int parenthesisCount;
+  BinaryOpNode(int parenthesisCount) : parenthesisCount{parenthesisCount} {};
 
   void print(int Depth) const override {
-    debug_log(getBranch(Depth), "BinaryOpNode: ", OP);
+    debug_log(getBranch(Depth), " BinaryOpNode: ", OP,
+              ", parenthesisCount: ", parenthesisCount);
     if (Left) {
       Left->print(Depth + 1);
     }

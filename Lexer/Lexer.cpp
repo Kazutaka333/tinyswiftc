@@ -70,7 +70,6 @@ Token Lexer::getNextToken() {
 
     // tokenizing keyword or identifier
     if (isspace(nextChar) || delimiters.find(nextChar) != delimiters.end()) {
-      debug_log(",", buffer, ",");
       if (buffer == "func")
         return Token(tok_func, buffer);
       if (buffer == "return")

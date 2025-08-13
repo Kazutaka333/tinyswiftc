@@ -54,6 +54,11 @@ assert "func main() -> Int { // comment1
 return 3 
 // comment2
 }" 3
+assert "func main() -> Int { return (3) }" 3
+assert "func main() -> Int { return (3 + 1) * 3 }" 12
+assert "func main() -> Int { return 13 - (3 + 1) * 3 }" 1
+assert "func main() -> Int { return (1 + 3) * (2 + 3 ) }" 20
+assert "func main() -> Int { return 3 * (2 + (3 + 1)) }" 18
 
 
 echo OK

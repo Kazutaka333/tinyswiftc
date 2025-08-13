@@ -30,10 +30,10 @@ Parser::Parser(Lexer &lexer)
 }
 
 static std::map<std::string, int> PrecedenceTable = {
-    {"*", 0},
-    {"/", 0},
-    {"+", 1},
-    {"-", 1},
+    {"*", 1},
+    {"/", 1},
+    {"+", 0},
+    {"-", 0},
 };
 
 std::vector<std::unique_ptr<ArgumentNode>> Parser::parseParameterList() {
@@ -129,7 +129,7 @@ std::unique_ptr<FunctionBodyNode> Parser::parseFunctionBody() {
       funcBody->expressions.push_back(std::move(returnExpr));
     } else {
       std::cerr << "Expected expression in function body but found:"
-                << currentToken.type << currentToken.identifierName
+                << currentToken.type << " " << currentToken.identifierName
                 << std::endl;
 
       return nullptr;
@@ -148,7 +148,7 @@ std::unique_ptr<ReturnNode> Parser::parseReturnExpression() {
   currentToken = lexer.getNextToken(); // Consume 'return'
   auto returnExpr = std::make_unique<ReturnNode>();
 
-  std::unique_ptr<ExprNode> expr = parseExpression();
+  std::unique_ptr<ExprNode> expr = parseExpression(0);
   if (!expr) {
     std::cerr << "Expected expression after 'return'" << std::endl;
     return nullptr;
@@ -158,8 +158,13 @@ std::unique_ptr<ReturnNode> Parser::parseReturnExpression() {
   return std::move(returnExpr);
 }
 
-std::unique_ptr<ExprNode> Parser::parseExpression() {
+std::unique_ptr<ExprNode> Parser::parseExpression(int parenthesisCount) {
   std::unique_ptr<ExprNode> expr;
+  while (currentToken.type == tok_left_paren) {
+    currentToken = lexer.getNextToken(); // Consume left parenthesis
+    parenthesisCount++;
+  }
+
   if (currentToken.type == tok_identifier) {
     expr = std::make_unique<VariableNode>(currentToken.identifierName);
   } else if (currentToken.type == tok_int) {
@@ -169,11 +174,15 @@ std::unique_ptr<ExprNode> Parser::parseExpression() {
               << std::endl;
     return nullptr;
   }
-  currentToken = lexer.getNextToken(); // Consume expression / Left operand
-  // parse Binary Operator
+  currentToken = lexer.getNextToken(); // Consume expression or Left operand
+                                       // parse Binary Operator
+  while (currentToken.type == tok_right_paren) {
+    currentToken = lexer.getNextToken(); // Consume right parenthesis
+    parenthesisCount--;
+  }
   if (currentToken.type == tok_plus || currentToken.type == tok_minus ||
       currentToken.type == tok_multiply || currentToken.type == tok_divide) {
-    auto binOpNode = parseRightBinaryOpExpression();
+    auto binOpNode = parseRightBinaryOpExpression(parenthesisCount);
     BinaryOpNode *tempNode = binOpNode.get();
     while (auto tempBinNode =
                dynamic_cast<BinaryOpNode *>(tempNode->Left.get())) {
@@ -182,21 +191,31 @@ std::unique_ptr<ExprNode> Parser::parseExpression() {
     tempNode->Left = std::move(expr);
     return std::move(binOpNode);
   }
+
   return std::move(expr);
 }
 
-std::unique_ptr<BinaryOpNode> Parser::parseRightBinaryOpExpression() {
-  auto binOpNode = std::make_unique<BinaryOpNode>();
+std::unique_ptr<BinaryOpNode>
+Parser::parseRightBinaryOpExpression(int parenthesisCount) {
+  auto binOpNode = std::make_unique<BinaryOpNode>(parenthesisCount);
   binOpNode->OP = currentToken.identifierName;
   currentToken = lexer.getNextToken(); // Consume the operator
-  auto rightExpr = parseExpression();
+  auto rightExpr = parseExpression(parenthesisCount);
   if (auto rightBinOpNode = dynamic_cast<BinaryOpNode *>(rightExpr.get())) {
-    debug_log(currentToken.identifierName);
-    // current op is slower than right op
-    if (PrecedenceTable[binOpNode->OP] <= PrecedenceTable[rightBinOpNode->OP]) {
+    bool leftOpHasMoreParenthese =
+        binOpNode->parenthesisCount > rightBinOpNode->parenthesisCount;
+    bool leftAndRightOpHaveSameParenthese =
+        binOpNode->parenthesisCount == rightBinOpNode->parenthesisCount;
+    bool leftOpHasHigherOrEqaulPrecendence =
+        PrecedenceTable[binOpNode->OP] >= PrecedenceTable[rightBinOpNode->OP];
+    bool leftOpIsPrioritized =
+        leftOpHasMoreParenthese ||
+        (leftAndRightOpHaveSameParenthese && leftOpHasHigherOrEqaulPrecendence);
+    // current op is more prioritized than right op
+    if (leftOpIsPrioritized) {
       binOpNode->Right = std::move(rightBinOpNode->Left);
       rightBinOpNode->Left = std::move(binOpNode);
-      rightExpr.release();
+      auto unused = rightExpr.release();
       return std::unique_ptr<BinaryOpNode>(rightBinOpNode);
     }
   }

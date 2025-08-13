@@ -24,8 +24,9 @@ class Parser {
   std::unique_ptr<ArgumentNode> parseArgument();
   std::unique_ptr<FunctionBodyNode> parseFunctionBody();
   std::unique_ptr<ReturnNode> parseReturnExpression();
-  std::unique_ptr<ExprNode> parseExpression();
-  std::unique_ptr<BinaryOpNode> parseRightBinaryOpExpression();
+  std::unique_ptr<ExprNode> parseExpression(int parenthesisCount);
+  std::unique_ptr<BinaryOpNode>
+  parseRightBinaryOpExpression(int parenthesisCount);
 
 public:
   std::unique_ptr<FileASTNode> root;
