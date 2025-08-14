@@ -42,7 +42,7 @@ public:
 
     // Create function
     return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage,
-                                  "main", Module);
+                                  name, Module);
   }
 };
 

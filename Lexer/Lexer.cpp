@@ -17,81 +17,83 @@ Lexer::Lexer(const std::string &filename) : filename(filename) {
 }
 
 bool skipSpace(std::ifstream &file) {
-  char ch;
-  bool hasSkipped = false;
+  char Ch;
+  bool HasSkipped = false;
   while (isspace(file.peek())) {
-    file.get(ch);
-    hasSkipped = true;
+    file.get(Ch);
+    HasSkipped = true;
   }
-  return hasSkipped;
+  return HasSkipped;
 }
 
 Token Lexer::getNextToken() {
-  char ch;
-  std::unordered_set<char> delimiters = {',', '.', '(', ')', '{',
+  char Ch;
+  std::unordered_set<char> Delimiters = {',', '.', '(', ')', '{',
                                          '}', ':', '-', EOF};
-  std::string buffer;
-  bool hasLeadingSpace;
-  hasLeadingSpace = skipSpace(file);
+  std::string Buffer;
+  bool HasLeadingSpace;
+  HasLeadingSpace = skipSpace(file);
 
   // scan for token
-  while (file.get(ch)) {
-    buffer += ch;
-    char nextChar = file.peek();
+  while (file.get(Ch)) {
+    Buffer += Ch;
+    char NextChar = file.peek();
 
-    if (buffer == "//") {
-      while (ch != '\n') {
-        file.get(ch);
+    if (Buffer == "//") {
+      while (Ch != '\n') {
+        file.get(Ch);
       }
-      buffer.clear();
-      hasLeadingSpace = skipSpace(file);
+      Buffer.clear();
+      HasLeadingSpace = skipSpace(file);
       continue;
     }
 
-    if (ch == '(')
-      return Token(tok_left_paren, buffer);
-    if (ch == ')')
-      return Token(tok_right_paren, buffer);
-    if (ch == ':')
-      return Token(tok_colon, buffer);
-    if (ch == ',')
-      return Token(tok_comma, buffer);
-    if (ch == '{')
-      return Token(tok_left_brace, buffer);
-    if (ch == '}')
-      return Token(tok_right_brace, buffer);
-    if (ch == '+')
-      return Token(tok_plus, buffer);
-    if (ch == '-' && nextChar != '>')
-      return Token(tok_minus, buffer);
-    if (ch == '*')
-      return Token(tok_multiply, buffer);
-    if (ch == '/' && nextChar != '/')
-      return Token(tok_divide, buffer);
-    if (buffer == "->")
-      return Token(tok_arrow, buffer);
+    if (Ch == '(')
+      return Token(tok_left_paren, Buffer);
+    if (Ch == ')')
+      return Token(tok_right_paren, Buffer);
+    if (Ch == ':')
+      return Token(tok_colon, Buffer);
+    if (Ch == ',')
+      return Token(tok_comma, Buffer);
+    if (Ch == '{')
+      return Token(tok_left_brace, Buffer);
+    if (Ch == '}')
+      return Token(tok_right_brace, Buffer);
+    if (Ch == '+')
+      return Token(tok_plus, Buffer);
+    if (Ch == '-' && NextChar != '>')
+      return Token(tok_minus, Buffer);
+    if (Ch == '*')
+      return Token(tok_multiply, Buffer);
+    if (Ch == '/' && NextChar != '/')
+      return Token(tok_divide, Buffer);
+    if (Buffer == "->")
+      return Token(tok_arrow, Buffer);
+    if (Buffer == "==")
+      return Token(tok_equal, Buffer);
 
     // tokenizing keyword or identifier
-    if (isspace(nextChar) || delimiters.find(nextChar) != delimiters.end()) {
-      if (buffer == "func")
-        return Token(tok_func, buffer);
-      if (buffer == "return")
-        return Token(tok_return, buffer);
-      if (std::all_of(buffer.begin(), buffer.end(), ::isdigit)) {
-        int value = strtod(buffer.c_str(), 0);
-        return Token(tok_int, value, hasLeadingSpace);
+    if (isspace(NextChar) || Delimiters.find(NextChar) != Delimiters.end()) {
+      if (Buffer == "func")
+        return Token(tok_func, Buffer);
+      if (Buffer == "return")
+        return Token(tok_return, Buffer);
+      if (std::all_of(Buffer.begin(), Buffer.end(), ::isdigit)) {
+        int Value = strtod(Buffer.c_str(), 0);
+        return Token(tok_int, Value, HasLeadingSpace);
       }
-      return Token(tok_identifier, buffer);
+      return Token(tok_identifier, Buffer);
     }
   }
   return Token(tok_eof);
 }
 
 Token Lexer::peekNextToken() {
-  std::streampos currentPos = file.tellg();
-  Token nextToken = getNextToken();
-  file.seekg(currentPos);
-  return nextToken;
+  std::streampos CurrentPos = file.tellg();
+  Token NextToken = getNextToken();
+  file.seekg(CurrentPos);
+  return NextToken;
 }
 
 std::ostream &operator<<(std::ostream &os, TokenType type) {

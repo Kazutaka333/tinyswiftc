@@ -37,7 +37,3 @@ $(OBJDIR)/%.o: %.cpp
 # Clean up build files
 clean:
 	rm -rf $(OBJDIR)
-
-test: 
-	@echo "Running tests..."
-	./test.sh

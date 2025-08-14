@@ -36,8 +36,12 @@ assert() {
 assert "func main() -> Int { return 0 }" 0
 assert "func main() -> Int {return 0}" 0
 assert "func main ()->Int{return 0}" 0
+
+# int
 assert "func main() -> Int { return 42 }" 42
 assert "func main( ) -> Int { return 255 }" 255
+
+# binary op
 assert "func main() -> Int { return 1 + 2 }" 3
 assert "func main() -> Int { return 10 + 123 }" 133
 assert "func main() -> Int { return 10 - 9 }" 1
@@ -51,6 +55,8 @@ assert "func main() -> Int { return 2 * 3 - 2 }" 4
 assert "func main() -> Int { return 10 + 2 * 3 - 2 }" 14
 assert "func main() -> Int { return 10 + 2 - 3 * 2 }" 6
 assert "func main() -> Int { return 10 / 2 }" 5
+
+# comment
 assert "func main() -> Int { // comment
 return 3 }" 3
 assert "func main() -> Int { // comment1
@@ -60,11 +66,17 @@ assert "func main() -> Int { // comment1
 return 3 
 // comment2
 }" 3
+
+# parenthese
 assert "func main() -> Int { return (3) }" 3
 assert "func main() -> Int { return (3 + 1) * 3 }" 12
 assert "func main() -> Int { return 13 - (3 + 1) * 3 }" 1
 assert "func main() -> Int { return (1 + 3) * (2 + 3 ) }" 20
 assert "func main() -> Int { return 3 * (2 + (3 + 1)) }" 18
+
+# comparison op
+assert "func main() -> Int { return 1 == 1 }" 1
+assert "func main() -> Int { return 1 == 0 }" 0
 
 
 echo OK

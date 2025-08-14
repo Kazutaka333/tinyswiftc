@@ -18,7 +18,7 @@
 
 class Parser {
   Lexer &lexer;
-  Token currentToken;
+  Token CurrentToken;
   std::unique_ptr<FunctionSignatureNode> parseFunctionSignature();
   std::vector<std::unique_ptr<ArgumentNode>> parseParameterList();
   std::unique_ptr<ArgumentNode> parseArgument();

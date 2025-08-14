@@ -1,0 +1,13 @@
+Checks: >
+  readability-identifier-naming
+CheckOptions:
+  - key: readability-identifier-naming.VariableCase
+    value: CamelCase     # PascalCase in our sense
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.MemberVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.StaticVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
