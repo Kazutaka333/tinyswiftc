@@ -6,7 +6,7 @@
   "configurations": [
     {
       "type": "lldb-dap",
-      "preLaunchTask": "make",
+      "preLaunchTask": "cmake then build",
       "request": "launch",
       "name": "Debug tinyswiftc compiling example.swift",
       "program": "${workspaceRoot}/build/tinyswiftc",

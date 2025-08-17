@@ -4,9 +4,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "make",
+      "label": "cmake then build",
       "type": "shell",
-      "command": "make clean && make",
+      "command": "rm -rf build && cmake -S . -B build && cmake --build build",
     }
   ]
 }
