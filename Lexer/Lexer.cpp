@@ -1,5 +1,4 @@
 #include "Lexer.h"
-#include "../Util/debug_log.h"
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -8,9 +7,9 @@
 #include <string>
 #include <unordered_set>
 
-Lexer::Lexer(const std::string &filename) : filename(filename) {
-  file.open(filename);
-  if (!file.is_open()) {
+Lexer::Lexer(const std::string &filename) : Filename(filename) {
+  File.open(filename);
+  if (!File.is_open()) {
     std::cerr << "Error opening file: " << filename << std::endl;
     return;
   }
@@ -32,103 +31,103 @@ Token Lexer::getNextToken() {
                                          '}', ':', '-', EOF};
   std::string Buffer;
   bool HasLeadingSpace;
-  HasLeadingSpace = skipSpace(file);
+  HasLeadingSpace = skipSpace(File);
 
   // scan for token
-  while (file.get(Ch)) {
+  while (File.get(Ch)) {
     Buffer += Ch;
-    char NextChar = file.peek();
+    char NextChar = File.peek();
 
     if (Buffer == "//") {
       while (Ch != '\n') {
-        file.get(Ch);
+        File.get(Ch);
       }
       Buffer.clear();
-      HasLeadingSpace = skipSpace(file);
+      HasLeadingSpace = skipSpace(File);
       continue;
     }
 
     if (Ch == '(')
-      return Token(tok_left_paren, Buffer);
+      return Token(TokLeftParen, Buffer);
     if (Ch == ')')
-      return Token(tok_right_paren, Buffer);
+      return Token(TokRightParen, Buffer);
     if (Ch == ':')
-      return Token(tok_colon, Buffer);
+      return Token(TokColon, Buffer);
     if (Ch == ',')
-      return Token(tok_comma, Buffer);
+      return Token(TokComma, Buffer);
     if (Ch == '{')
-      return Token(tok_left_brace, Buffer);
+      return Token(TokLeftBrace, Buffer);
     if (Ch == '}')
-      return Token(tok_right_brace, Buffer);
+      return Token(TokRightBrace, Buffer);
     if (Ch == '+')
-      return Token(tok_plus, Buffer);
+      return Token(TokPlus, Buffer);
     if (Ch == '-' && NextChar != '>')
-      return Token(tok_minus, Buffer);
+      return Token(TokMinus, Buffer);
     if (Ch == '*')
-      return Token(tok_multiply, Buffer);
+      return Token(TokMultiply, Buffer);
     if (Ch == '/' && NextChar != '/')
-      return Token(tok_divide, Buffer);
+      return Token(TokDivide, Buffer);
     if (Buffer == "->")
-      return Token(tok_arrow, Buffer);
+      return Token(TokArrow, Buffer);
     if (Buffer == "==")
-      return Token(tok_equal, Buffer);
+      return Token(TokEqual, Buffer);
 
     // tokenizing keyword or identifier
     if (isspace(NextChar) || Delimiters.find(NextChar) != Delimiters.end()) {
       if (Buffer == "func")
-        return Token(tok_func, Buffer);
+        return Token(TokFunc, Buffer);
       if (Buffer == "return")
-        return Token(tok_return, Buffer);
+        return Token(TokReturn, Buffer);
       if (std::all_of(Buffer.begin(), Buffer.end(), ::isdigit)) {
         int Value = strtod(Buffer.c_str(), 0);
-        return Token(tok_int, Value, HasLeadingSpace);
+        return Token(TokInt, Value, HasLeadingSpace);
       }
-      return Token(tok_identifier, Buffer);
+      return Token(TokIdentifier, Buffer);
     }
   }
-  return Token(tok_eof);
+  return Token(TokEof);
 }
 
 Token Lexer::peekNextToken() {
-  std::streampos CurrentPos = file.tellg();
+  std::streampos CurrentPos = File.tellg();
   Token NextToken = getNextToken();
-  file.seekg(CurrentPos);
+  File.seekg(CurrentPos);
   return NextToken;
 }
 
 std::ostream &operator<<(std::ostream &os, TokenType type) {
   switch (type) {
-  case tok_identifier:
+  case TokIdentifier:
     os << "Identifier";
     break;
-  case tok_func:
+  case TokFunc:
     os << "Function";
     break;
-  case tok_return:
+  case TokReturn:
     os << "Return";
     break;
-  case tok_eof:
+  case TokEof:
     os << "End of File";
     break;
-  case tok_left_paren:
+  case TokLeftParen:
     os << "Left Paren";
     break;
-  case tok_right_paren:
+  case TokRightParen:
     os << "Right Paren";
     break;
-  case tok_colon:
+  case TokColon:
     os << "Colon";
     break;
-  case tok_comma:
+  case TokComma:
     os << "Comma";
     break;
-  case tok_arrow:
+  case TokArrow:
     os << "Arrow";
     break;
-  case tok_left_brace:
+  case TokLeftBrace:
     os << "Left Brace";
     break;
-  case tok_right_brace:
+  case TokRightBrace:
     os << "Right Brace";
     break;
   default:

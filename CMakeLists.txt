@@ -33,7 +33,7 @@ add_executable(tinyswiftc ${PROJECT_SOURCES})
 
 
 # Common compile options (mirrors Makefile: -Wall -Wextra -g -v)
-target_compile_options(tinyswiftc PRIVATE -Wall -Wextra -g)
+target_compile_options(tinyswiftc PRIVATE -Wall -Wextra -Wno-unused-parameter)
 
 target_link_libraries(tinyswiftc PRIVATE LLVM)
 

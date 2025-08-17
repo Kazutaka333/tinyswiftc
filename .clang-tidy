@@ -2,7 +2,7 @@ Checks: >
   readability-identifier-naming
 CheckOptions:
   - key: readability-identifier-naming.VariableCase
-    value: CamelCase     # PascalCase in our sense
+    value: CamelCase
   - key: readability-identifier-naming.GlobalVariableCase
     value: CamelCase
   - key: readability-identifier-naming.MemberVariableCase
@@ -10,4 +10,6 @@ CheckOptions:
   - key: readability-identifier-naming.StaticVariableCase
     value: CamelCase
   - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
     value: CamelCase

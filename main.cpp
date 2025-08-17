@@ -19,21 +19,21 @@ int main(int argc, char *argv[]) {
   }
   // check if --debug flag is supplied
 
-  std::string fileName;
-  for (int i = 1; i < argc; ++i) {
-    if (std::string(argv[i]) == "--debug") {
+  std::string FileName;
+  for (int I = 1; I < argc; ++I) {
+    if (std::string(argv[I]) == "--debug") {
       debugEnabled = true;
     } else {
-      fileName = argv[i];
+      FileName = argv[I];
     }
   }
 
-  Lexer lexer = Lexer(fileName);
-  std::optional<Token> token;
+  Lexer LexerInstance = Lexer(FileName);
+  std::optional<Token> Token;
 
-  Parser parser(lexer);
+  Parser ParserInstance(LexerInstance);
   auto Context = std::make_unique<llvm::LLVMContext>();
-  auto Module = std::make_unique<llvm::Module>(fileName, *Context);
+  auto Module = std::make_unique<llvm::Module>(FileName, *Context);
   auto Builder = std::make_unique<llvm::IRBuilder<>>(*Context);
 
   llvm::InitializeAllTargetInfos();
@@ -59,33 +59,34 @@ int main(int argc, char *argv[]) {
   auto CPU = "generic";
   auto Features = "";
 
-  llvm::TargetOptions opt;
+  llvm::TargetOptions Opt;
   auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features,
-                                                   opt, llvm::Reloc::PIC_);
+                                                   Opt, llvm::Reloc::PIC_);
 
   Module->setDataLayout(TargetMachine->createDataLayout());
 
-  parser.root->codegen(*Context, *Module, *Builder);
+  ParserInstance.root->codegen(*Context, *Module, *Builder);
 
   // write LLVM IR
   auto IRFileName = "build/output.ll";
   std::error_code IREC;
-  llvm::raw_fd_ostream irOutput(IRFileName, IREC);
-  Module->print(irOutput, nullptr);
+  llvm::raw_fd_ostream IrOutput(IRFileName, IREC);
+  Module->print(IrOutput, nullptr);
 
-  auto FileName = "build/output.o";
+  auto OutputFileName = "build/output.o";
   std::error_code EC;
-  llvm::raw_fd_ostream dest(FileName, EC, llvm::sys::fs::OpenFlags::OF_None);
+  llvm::raw_fd_ostream Dest(OutputFileName, EC,
+                            llvm::sys::fs::OpenFlags::OF_None);
 
-  llvm::legacy::PassManager pass;
+  llvm::legacy::PassManager Pass;
   auto FileType = llvm::CodeGenFileType::ObjectFile;
 
-  if (TargetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
+  if (TargetMachine->addPassesToEmitFile(Pass, Dest, nullptr, FileType)) {
     llvm::errs() << "TargetMachine can't emit a file of this type";
     return 1;
   }
-  pass.run(*Module);
-  dest.flush();
+  Pass.run(*Module);
+  Dest.flush();
 
   return 0;
 }

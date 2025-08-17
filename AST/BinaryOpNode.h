@@ -1,6 +1,5 @@
 #include "ExprNode.h"
 #include <iostream>
-#include <sstream>
 class BinaryOpNode : public ExprNode {
 public:
   std::unique_ptr<ExprNode> Left;
@@ -37,5 +36,6 @@ public:
     } else {
       std::cerr << "Unknown Binary Operator " << OP << std::endl;
     }
+    return nullptr;
   }
 };

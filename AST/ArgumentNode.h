@@ -2,8 +2,6 @@
 #define ARGUMENT_AST_H
 
 #include "ASTNode.h"
-#include <iostream>
-#include <sstream>
 #include <string>
 
 class ArgumentNode : public ASTNode {

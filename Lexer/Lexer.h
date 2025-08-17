@@ -1,4 +1,4 @@
-// lexer.h
+// Lexer.h
 #ifndef LEXER_H
 #define LEXER_H
 
@@ -6,46 +6,46 @@
 #include <string>
 
 enum TokenType {
-  tok_identifier,
-  tok_func,
-  tok_return,
-  tok_eof,
-  tok_left_paren,
-  tok_right_paren,
-  tok_colon,
-  tok_comma,
-  tok_arrow,
-  tok_left_brace,
-  tok_right_brace,
-  tok_int,
-  tok_plus,
-  tok_minus,
-  tok_multiply,
-  tok_divide,
-  tok_equal
+  TokIdentifier,
+  TokFunc,
+  TokReturn,
+  TokEof,
+  TokLeftParen,
+  TokRightParen,
+  TokColon,
+  TokComma,
+  TokArrow,
+  TokLeftBrace,
+  TokRightBrace,
+  TokInt,
+  TokPlus,
+  TokMinus,
+  TokMultiply,
+  TokDivide,
+  TokEqual
 };
 
 std::ostream &operator<<(std::ostream &os, TokenType type);
 
 struct Token {
-  TokenType type;
-  std::string identifierName;
-  int intValue;
-  bool hasLeadingSpace;
+  TokenType Type;
+  std::string IdentifierName;
+  int IntValue = 0;
+  bool HasLeadingSpace = false;
 
   Token() = default;
-  Token(const TokenType type, const std::string &identifierName = "")
-      : type(type), identifierName(identifierName) {};
-  Token(const TokenType type, const int intValue, const bool hasLeadingSpace)
-      : type(type), intValue(intValue), hasLeadingSpace(hasLeadingSpace) {};
+  Token(const TokenType Type, const std::string &IdentifierName = "")
+      : Type(Type), IdentifierName(IdentifierName) {};
+  Token(const TokenType Type, const int IntValue, const bool HasLeadingSpace)
+      : Type(Type), IntValue(IntValue), HasLeadingSpace(HasLeadingSpace) {};
 };
 
 class Lexer {
-  std::string filename;
-  std::ifstream file;
+  std::string Filename;
+  std::ifstream File;
 
 public:
-  Lexer(const std::string &filename);
+  Lexer(const std::string &Filename);
   Token getNextToken();
   Token peekNextToken();
 };

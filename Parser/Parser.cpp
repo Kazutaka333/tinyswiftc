@@ -15,14 +15,14 @@ Parser::Parser(Lexer &lexer)
   // Initialize the parser with the lexer
   while (true) {
     CurrentToken = lexer.getNextToken();
-    if (CurrentToken.type == tok_eof) {
+    if (CurrentToken.Type == TokEof) {
       break;
     }
-    if (CurrentToken.type == tok_func) {
-      auto func = std::make_unique<FunctionNode>();
-      func->signature = parseFunctionSignature();
-      func->body = parseFunctionBody();
-      root->children.push_back(std::move(func));
+    if (CurrentToken.Type == TokFunc) {
+      auto Func = std::make_unique<FunctionNode>();
+      Func->signature = parseFunctionSignature();
+      Func->body = parseFunctionBody();
+      root->Children.push_back(std::move(Func));
     }
   }
 
@@ -37,199 +37,199 @@ static std::map<std::string, std::string> BinOpTypeTable = {
     {"*", "Int"}, {"/", "Int"}, {"+", "Int"}, {"-", "Int"}, {"==", "Any"}};
 
 std::vector<std::unique_ptr<ArgumentNode>> Parser::parseParameterList() {
-  auto params = std::vector<std::unique_ptr<ArgumentNode>>();
-  while (CurrentToken.type != tok_right_paren) {
-    auto param = parseArgument();
-    if (param) {
-      params.push_back(std::move(param));
+  auto Params = std::vector<std::unique_ptr<ArgumentNode>>();
+  while (CurrentToken.Type != TokRightParen) {
+    auto Param = parseArgument();
+    if (Param) {
+      Params.push_back(std::move(Param));
     }
-    if (CurrentToken.type == tok_comma) {
+    if (CurrentToken.Type == TokComma) {
       CurrentToken = lexer.getNextToken(); // Consume ','
     }
   }
   CurrentToken = lexer.getNextToken(); // Consume ')'
-  return params;
+  return Params;
 }
 
 std::unique_ptr<ArgumentNode> Parser::parseArgument() {
-  if (CurrentToken.type != tok_identifier) {
+  if (CurrentToken.Type != TokIdentifier) {
     std::cerr << "Expected parameter name" << std::endl;
     return nullptr;
   }
-  std::string paramName = CurrentToken.identifierName;
+  std::string ParamName = CurrentToken.IdentifierName;
   CurrentToken = lexer.getNextToken(); // Consume parameter name
-  if (CurrentToken.type != tok_colon) {
+  if (CurrentToken.Type != TokColon) {
     std::cerr << "Expected ':' after parameter name" << std::endl;
     return nullptr;
   }
   CurrentToken = lexer.getNextToken(); // Consume ':'
-  if (CurrentToken.type != tok_identifier) {
+  if (CurrentToken.Type != TokIdentifier) {
     std::cerr << "Expected parameter type" << std::endl;
     return nullptr;
   }
-  std::string paramType = CurrentToken.identifierName;
-  auto param = std::make_unique<ArgumentNode>(paramName, paramType);
+  std::string ParamType = CurrentToken.IdentifierName;
+  auto Param = std::make_unique<ArgumentNode>(ParamName, ParamType);
   CurrentToken = lexer.getNextToken(); // Consume parameter type
-  return std::move(param);
+  return Param;
 }
 
 std::unique_ptr<FunctionSignatureNode> Parser::parseFunctionSignature() {
-  auto funcSignature = std::make_unique<FunctionSignatureNode>();
+  auto FuncSignature = std::make_unique<FunctionSignatureNode>();
 
-  std::string funcName;
-  std::string returnType;
+  std::string FuncName;
+  std::string ReturnType;
 
   CurrentToken = lexer.getNextToken(); // Consume the function keyword
-  if (CurrentToken.type != tok_identifier) {
+  if (CurrentToken.Type != TokIdentifier) {
     std::cerr << "Expected function name after 'func'" << std::endl;
     return nullptr;
   }
-  funcName = CurrentToken.identifierName;
+  FuncName = CurrentToken.IdentifierName;
   CurrentToken = lexer.getNextToken(); // Consume the function name
-  if (CurrentToken.type != tok_left_paren) {
+  if (CurrentToken.Type != TokLeftParen) {
     std::cerr << "Expected '(' after function name" << std::endl;
     return nullptr;
   }
   CurrentToken = lexer.getNextToken(); // Consume '('
-  funcSignature->parameters = parseParameterList();
+  FuncSignature->parameters = parseParameterList();
 
-  if (CurrentToken.type == tok_arrow) {
+  if (CurrentToken.Type == TokArrow) {
     CurrentToken = lexer.getNextToken(); // Consume '->'
-    if (CurrentToken.type != tok_identifier) {
+    if (CurrentToken.Type != TokIdentifier) {
       std::cerr << "Expected return type after '->'" << std::endl;
       return nullptr;
     }
-    returnType = CurrentToken.identifierName;
+    ReturnType = CurrentToken.IdentifierName;
     CurrentToken = lexer.getNextToken(); // Consume return type
   }
 
-  funcSignature->name = funcName;
-  funcSignature->returnType = returnType;
+  FuncSignature->name = FuncName;
+  FuncSignature->returnType = ReturnType;
 
-  return std::move(funcSignature);
+  return FuncSignature;
 }
 
 std::unique_ptr<FunctionBodyNode> Parser::parseFunctionBody() {
-  auto funcBody = std::make_unique<FunctionBodyNode>();
+  auto FuncBody = std::make_unique<FunctionBodyNode>();
 
-  if (CurrentToken.type != tok_left_brace) {
+  if (CurrentToken.Type != TokLeftBrace) {
     std::cerr << "Expected '{' to start function body but found "
-              << CurrentToken.type << std::endl;
+              << CurrentToken.Type << std::endl;
     return nullptr;
   }
   CurrentToken = lexer.getNextToken(); // Consume '{'
 
-  while (CurrentToken.type != tok_right_brace) {
-    if (CurrentToken.type == tok_eof) {
+  while (CurrentToken.Type != TokRightBrace) {
+    if (CurrentToken.Type == TokEof) {
       std::cerr << "Unexpected end of file in function body" << std::endl;
       return nullptr;
     }
-    if (CurrentToken.type == tok_return) {
-      auto returnExpr = parseReturnExpression();
-      funcBody->expressions.push_back(std::move(returnExpr));
+    if (CurrentToken.Type == TokReturn) {
+      auto ReturnExpr = parseReturnExpression();
+      FuncBody->expressions.push_back(std::move(ReturnExpr));
     } else {
       std::cerr << "Expected expression in function body but found:"
-                << CurrentToken.type << " " << CurrentToken.identifierName
+                << CurrentToken.Type << " " << CurrentToken.IdentifierName
                 << std::endl;
 
       return nullptr;
     }
   }
 
-  if (CurrentToken.type != tok_right_brace) {
+  if (CurrentToken.Type != TokRightBrace) {
     std::cerr << "Expected '}' to end function body" << std::endl;
     return nullptr;
   }
   CurrentToken = lexer.getNextToken(); // Consume '}'
-  return std::move(funcBody);
+  return FuncBody;
 }
 
 std::unique_ptr<ReturnNode> Parser::parseReturnExpression() {
   CurrentToken = lexer.getNextToken(); // Consume 'return'
-  auto returnExpr = std::make_unique<ReturnNode>();
+  auto ReturnExpr = std::make_unique<ReturnNode>();
 
-  std::unique_ptr<ExprNode> expr = parseExpression(0);
-  if (!expr) {
+  std::unique_ptr<ExprNode> Expr = parseExpression(0);
+  if (!Expr) {
     std::cerr << "Expected expression after 'return'" << std::endl;
     return nullptr;
   }
 
-  returnExpr->expression = std::move(expr);
-  return std::move(returnExpr);
+  ReturnExpr->expression = std::move(Expr);
+  return ReturnExpr;
 }
 
 std::unique_ptr<ExprNode> Parser::parseExpression(int parenthesisCount) {
-  std::unique_ptr<ExprNode> expr;
-  while (CurrentToken.type == tok_left_paren) {
+  std::unique_ptr<ExprNode> Expr;
+  while (CurrentToken.Type == TokLeftParen) {
     CurrentToken = lexer.getNextToken(); // Consume left parenthesis
     parenthesisCount++;
   }
 
-  if (CurrentToken.type == tok_identifier) {
-    expr = std::make_unique<VariableNode>(CurrentToken.identifierName);
-  } else if (CurrentToken.type == tok_int) {
-    expr = std::make_unique<IntNode>(CurrentToken.intValue);
-  } else if (CurrentToken.type == tok_minus) {
+  if (CurrentToken.Type == TokIdentifier) {
+    Expr = std::make_unique<VariableNode>(CurrentToken.IdentifierName);
+  } else if (CurrentToken.Type == TokInt) {
+    Expr = std::make_unique<IntNode>(CurrentToken.IntValue);
+  } else if (CurrentToken.Type == TokMinus) {
     // parse unary minus operator
     CurrentToken = lexer.getNextToken(); // Consume minus sign
-    if (CurrentToken.type != tok_int || CurrentToken.hasLeadingSpace) {
+    if (CurrentToken.Type != TokInt || CurrentToken.HasLeadingSpace) {
       std::cerr << "- unary operator cannot be separated from its operand"
                 << std::endl;
       return nullptr;
     }
-    expr = std::make_unique<IntNode>(-CurrentToken.intValue);
+    Expr = std::make_unique<IntNode>(-CurrentToken.IntValue);
   } else {
-    std::cerr << "Failed to parse expression: found " << CurrentToken.type
+    std::cerr << "Failed to parse expression: found " << CurrentToken.Type
               << std::endl;
     return nullptr;
   }
   CurrentToken = lexer.getNextToken(); // Consume expression or Left operand
                                        // parse Binary Operator
-  while (CurrentToken.type == tok_right_paren) {
+  while (CurrentToken.Type == TokRightParen) {
     CurrentToken = lexer.getNextToken(); // Consume right parenthesis
     parenthesisCount--;
   }
-  if (CurrentToken.type == tok_plus || CurrentToken.type == tok_minus ||
-      CurrentToken.type == tok_multiply || CurrentToken.type == tok_divide) {
-    auto binOpNode = parseRightBinaryOpExpression(parenthesisCount);
-    BinaryOpNode *tempNode = binOpNode.get();
-    while (auto tempBinNode =
-               dynamic_cast<BinaryOpNode *>(tempNode->Left.get())) {
-      tempNode = tempBinNode;
+  if (CurrentToken.Type == TokPlus || CurrentToken.Type == TokMinus ||
+      CurrentToken.Type == TokMultiply || CurrentToken.Type == TokDivide) {
+    auto BinOpNode = parseRightBinaryOpExpression(parenthesisCount);
+    BinaryOpNode *TempNode = BinOpNode.get();
+    while (auto TempBinNode =
+               dynamic_cast<BinaryOpNode *>(TempNode->Left.get())) {
+      TempNode = TempBinNode;
     }
-    tempNode->Left = std::move(expr);
-    return std::move(binOpNode);
+    TempNode->Left = std::move(Expr);
+    return std::move(BinOpNode);
   }
 
-  return std::move(expr);
+  return Expr;
 }
 
 std::unique_ptr<BinaryOpNode>
 Parser::parseRightBinaryOpExpression(int ParenthesisCount) {
-  std::string Type = BinOpTypeTable[CurrentToken.identifierName];
-  auto BinOpNode = std::make_unique<BinaryOpNode>(CurrentToken.identifierName,
+  std::string Type = BinOpTypeTable[CurrentToken.IdentifierName];
+  auto BinOpNode = std::make_unique<BinaryOpNode>(CurrentToken.IdentifierName,
                                                   Type, ParenthesisCount);
   CurrentToken = lexer.getNextToken(); // Consume the operator
-  auto rightExpr = parseExpression(ParenthesisCount);
-  if (auto rightBinOpNode = dynamic_cast<BinaryOpNode *>(rightExpr.get())) {
-    bool leftOpHasMoreParenthese =
-        BinOpNode->ParenthesisCount > rightBinOpNode->ParenthesisCount;
-    bool leftAndRightOpHaveSameParenthese =
-        BinOpNode->ParenthesisCount == rightBinOpNode->ParenthesisCount;
-    bool leftOpHasHigherOrEqaulPrecendence =
-        PrecedenceTable[BinOpNode->OP] >= PrecedenceTable[rightBinOpNode->OP];
-    bool leftOpIsPrioritized =
-        leftOpHasMoreParenthese ||
-        (leftAndRightOpHaveSameParenthese && leftOpHasHigherOrEqaulPrecendence);
+  auto RightExpr = parseExpression(ParenthesisCount);
+  if (auto RightBinOpNode = dynamic_cast<BinaryOpNode *>(RightExpr.get())) {
+    bool LeftOpHasMoreParenthese =
+        BinOpNode->ParenthesisCount > RightBinOpNode->ParenthesisCount;
+    bool LeftAndRightOpHaveSameParenthese =
+        BinOpNode->ParenthesisCount == RightBinOpNode->ParenthesisCount;
+    bool LeftOpHasHigherOrEqaulPrecendence =
+        PrecedenceTable[BinOpNode->OP] >= PrecedenceTable[RightBinOpNode->OP];
+    bool LeftOpIsPrioritized =
+        LeftOpHasMoreParenthese ||
+        (LeftAndRightOpHaveSameParenthese && LeftOpHasHigherOrEqaulPrecendence);
     // current op is more prioritized than right op
-    if (leftOpIsPrioritized) {
-      BinOpNode->Right = std::move(rightBinOpNode->Left);
-      rightBinOpNode->Left = std::move(BinOpNode);
-      auto unused = rightExpr.release();
-      return std::unique_ptr<BinaryOpNode>(rightBinOpNode);
+    if (LeftOpIsPrioritized) {
+      BinOpNode->Right = std::move(RightBinOpNode->Left);
+      RightBinOpNode->Left = std::move(BinOpNode);
+      RightExpr.release();
+      return std::unique_ptr<BinaryOpNode>(RightBinOpNode);
     }
   }
-  BinOpNode->Right = std::move(rightExpr);
+  BinOpNode->Right = std::move(RightExpr);
 
-  return std::move(BinOpNode);
+  return BinOpNode;
 }
